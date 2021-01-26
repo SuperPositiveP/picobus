@@ -1,0 +1,44 @@
+============================================================================================
+
+	PicoBus ENCORE (v2.1b silent patch 2 built using PICO-8 v0.2.1b)
+	Author: SuperPositiveP
+
+	PicoBus is built with:
+		PICO-8 https://www.lexaloffle.com/pico-8.php
+		zep's px9 compression https://www.lexaloffle.com/bbs/?tid=34058
+		DocRobs' Particle System (Thanks!) https://www.lexaloffle.com/bbs/?pid=58294
+		colecobug's box-art template https://www.lexaloffle.com/bbs/?tid=3489
+		ShootingStar's Super Debug Menu https://www.lexaloffle.com/bbs/?tid=33099
+
+============================================================================================
+
+Okay, so let's keep this as a simple README.txt-esue thing.
+
+There are exacty 12 playable buses in the game. (Some of which ARENT buses...)
+
+These include buses from the original CrazyBus and are:
+
+		the irizar century 3.95,
+		the busscar vissta buss,
+		the generic school-bus,
+		the busscar jum buss 360,
+		the encava e-nt6000,
+		the marcopolo paradiso gv1150,
+		the pico-8 logo,
+		loge,
+		impostor loge,
+		totally not a hotweels m&m-themed bus I found on google for a joke,
+		hero wentward dt40l from BeamNG,
+		sleipnir glacier bus from iceland
+
+Some of these buses (but not all) have special features about them.
+You can find those out for yourself.
+
+This game DOES in fact have the iconic music from the original CrazyBus.
+
+Finally, there is a small corruptor mode I included from a snippet.
+Access it by holding UP and LEFT on whatever control method you use while the PICO-8 splash is on screen.
+It really only corrupts the titlescreen and all the sounds and sprites, it doesn't actively corrupt the game lol.
+
+That's about it, have fun toying around with my little COVID-19 stir-craziness project.
+
