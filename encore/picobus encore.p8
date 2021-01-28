@@ -16,7 +16,7 @@ crazybus experience.
 --]]
 
 -- version information
-codename, version, binary, debug = "encore", "2.1b p3", false, true
+codename, version, binary, debug = "encore", "3.0", false, true
 
 -- default bus selection
 defbus = 1
@@ -29,7 +29,7 @@ function _init()
 
 	if debug then
 		debug_enabled()
-	else
+--[[	else
 		-- double check that we are
 		-- not in 64x64 mode
 		poke(0x5f2c,0)
@@ -40,18 +40,16 @@ function _init()
 		local lowrescart = "#wtf01_mini"
 		if (binary) lowrescart = "picobus mini.p8"
 		menuitem(2, "dlc: lowresjam", function() load(lowrescart)end)
+--]]
 	end
 
 	--[[
-
+	
 	current screen
 
 	the splash screens dont count
 	as they only show once when
 	the cartridge boots.
-
-	for the love of god replace
-	this already, nicky.
 	--]]
 
 	--[[

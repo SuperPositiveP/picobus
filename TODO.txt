@@ -1,3 +1,4 @@
-1. PICOBUS CLASSIC
-2. Overhaul PicoBus Encore/Mini and add Dukebox plus Coge
+2. Improve PicoBus Encore/Mini and add Dukebox plus Coge
+2. Make a real engine for picobus.
+1. PICOBUS CLASSIC (Should be a merge of the new encore/mini build and the switch/3ds builds into a smaller more classic build to resemble crazybus pre-2.0)
 3. Reorganize extras for github repo

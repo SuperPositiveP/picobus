@@ -1,0 +1,1367 @@
+pico-8 cartridge // http://www.pico-8.com
+version 22
+__lua__
+-- picobus 3ds and swtich
+-- superpositivep
+
+-- this port is a mix of all
+-- publicly known crazybus
+-- versions (0.7, 0.8, 1.1, 2.0)
+
+-- this is due to both limitations
+-- of pico-8 and the aim of
+-- crafting a near definitive
+-- crazybus experience.
+
+-- ported from pico-8 to nintendo
+-- consoles for retards.
+
+
+-- version information
+codename = "momohime"
+version = "2.00"
+
+-- todo:
+--	in order to port this to the
+--	new platforms i have to port
+-- this code so that it works
+-- on 0.2d pico-8.
+	
+-- i also have to remove flip()
+-- from this code or add it
+-- as a simple sleep function
+-- to this implementation of
+-- the pico-8 api.
+
+-- rnd on table causes arith error
+-- blank srand causes arith error
+-- using stat causes nil error
+
+-- 0. nintendo switch
+-- 1. nintendo 3ds
+-- 2. nintendo wii if hell freezes over
+
+conssel = 0
+hell_freezes_over = false
+-- for 3ds aspect ratio
+fix3dsratio = false
+
+if conssel==0 then
+	console = "switch"
+elseif conssel==1 then
+	console = "3ds"
+elseif hell_freezes_over then
+	console = "wii"
+else
+ console = ""
+end
+
+multi_run = false
+
+function _init()	
+	
+-- current screen
+	
+-- the splash screens dont count
+-- as they only show once when
+-- the cartridge boots.
+	scr = {
+	title=false,
+	bussel=false,
+	inst=false,
+	game=false
+	}
+
+	-- gfx
+	blink_frame = false
+	t = 0
+	txt_flash = false
+
+	-- logo rainbow colors
+	title_rainbow = {
+	3, 7, 9, 10, 11, 12, 13, 14
+	}
+  
+	-- random bus color choices
+	bus_rainbow = {
+	--2, 3, 4, 6, 8, 9, 10, 11, 12, 14
+	2, 3, 6, 8, 9, 10, 11, 14
+	}
+	
+	-- game score
+	score = 0
+  
+	-- bus position
+	pos = 0
+	
+	-- wheel animation frame
+	wanim = 0
+	
+	-- instructions countdown
+	instcount = 3
+	
+	-- game bg color pallete
+	bgcolpal = 7
+	
+	-- randomized bus color
+	buscol = 14
+
+	-- selected bus
+	defbus = 1
+	busid = defbus
+
+	-- bus info
+  
+-- hp refers to the horsepower
+-- of the engine.
+
+
+-- bus ids are in the order they
+-- were added into the original
+-- game each version.	
+
+	century395={
+		brand="irizar",
+		name="century 3.95",
+		origin="spain",
+		height="3.95m (sd)",
+		flavor1="the superior luxury bus",
+		flavor2="mercedes benz chassis",
+		flavor3="first bus added to crazybus",
+		motorhp="360hp",
+		passangers="50 (max)",
+		id=1,
+		rndcolor=true,
+		sx=32,
+		sy=16,
+		sw=8*4,
+		sh=8,
+		dy=94,
+		dw=(8*4)*2,
+		dh=16,
+		w1sx=37,
+		w2sx=48,
+		wsy=22,
+		psprite=68
+		}
+
+	--update infoflags
+	visstabuss={
+		brand="busscar",
+		name="vissta buss",
+		origin="brazil?",
+		height="?",
+		flavor1="this bus was cut from",
+		flavor2="the original crazybus",
+		flavor3="in version 1.1",
+		motorhp="???hp",
+		passangers="????????",
+		rndcolor=false,
+		id=2,
+		sx=64,
+		sy=16,
+		sw=8*3,
+		sh=8,
+		dy=94,
+		dw=(8*3)*2,
+		dh=16,
+		w1sx=69,
+		w2sx=80,
+		wsy=22,
+		psprite=212
+		}
+
+	schoolbus={
+		brand="generic",
+		name="school bus",
+		origin="?",
+		height="2.50m (sd)",
+		flavor1="classic yellow schoolbus",
+		flavor2="variable configurations",
+		flavor3="weak ford or chevy engine",
+		motorhp="200hp",
+		passangers="60 (max)",
+		id=3,
+		rndcolor=false,
+		sx=40,
+		sy=24,
+		sw=8*3,
+		sh=8,
+		dy=96,
+		dw=(8*3)*2,
+		dh=16,
+		w1sx=45,
+		w2sx=56,
+		wsy=29,
+		psprite=116
+		}
+
+	jumbuss={
+		brand="busscar",
+		name="jum buss 360",
+		origin="brazil",
+		height="3.60m (sd)",
+		flavor1="the sturdy bus",
+		flavor2="best chassis (volvo)",
+		flavor3="",
+		motorhp="360hp",
+		passangers="52 (max)",
+		rndcolor=true,
+		id=4,
+		sx=104,
+		sy=0,
+		sw=8*3,
+		sh=8,
+		dy=94,
+		dw=(8*3)*2,
+		dh=16,
+		w1sx=109,
+		w2sx=120,
+		wsy=6,
+		psprite=72
+		}
+
+	ent6000={
+		brand="encava",
+		name="e-nt6000",
+		origin="venezuela",
+		height="3.80m (sd)",
+		flavor1="model for short routes",
+		flavor2="has a custom chassis",
+		flavor3="had 340 horsepower in cb v1.1",
+		motorhp="300hp",
+		passangers="40 (max)",
+		rndcolor=true,
+		id=5,
+		sx=64,
+		sy=24,
+		sw=8*4,
+		sh=8,
+		dy=94,
+		dw=(8*4)*2,
+		dh=16,
+		w1sx=69,
+		w2sx=80,
+		wsy=30,
+		psprite=76
+		}
+
+	pgv1150={
+		brand="marcopolo",
+		name="paradiso gv1150",
+		origin="brazil",
+		height="3.55m (sd)",
+		flavor1="the legendary bus",
+		flavor2="uses a volvo chassis",
+		flavor3="",
+		motorhp="340hp",
+		passangers="52 (max)",
+		rndcolor=true,
+		id=6,
+		sx=64,
+		sy=8,
+		sw=8*3,
+		sh=8,
+		dy=94,
+		dw=(8*3)*2,
+		dh=16,
+		w1sx=69,
+		w2sx=80,
+		wsy=14,
+		psprite=164
+  }
+  
+  --easter egg/bonus below
+	pico8={
+		brand="lexaloffle",
+		name="pico-8 logo",
+		origin="fantasy land",
+		height="n/a",
+		flavor1="surely i don't need",
+		flavor2="to explain what this is?",
+		flavor3="",
+		motorhp="  n/a",
+		passangers="     n/a",
+		rndcolor=false,
+		id=7,
+		sx=0,
+		sy=8,
+		sw=8*4,
+		sh=8,
+		dy=94,
+		dw=(8*4)*2,
+		dh=16,
+		w1sx=3,
+		w2sx=23,
+		wsy=14,
+		psprite=16
+		}
+
+	loge={
+		brand="hfad",
+		name="loge",
+		origin="hiipaspooker",
+		height=">small",
+		flavor1="a log with a doge face",
+		flavor2="sports a cute hat",
+		flavor3="youtube.com/c/hiipaspooker",
+		motorhp="  n/a",
+		passangers="     n/a",
+		rndcolor=false,
+		flipped=false,
+		id=8,
+		psprite=28
+		}
+	
+	-- bus info by id.
+	busbyid = {
+		century395,
+		visstabuss,
+		schoolbus,
+		jumbuss,
+		ent6000,
+		pgv1150,
+		pico8,
+		loge
+		}
+
+	-- for music timing
+	mus_update = 1
+
+	-- pico-8 intro splash
+	-- mimics sega intro in cb 2.0
+	
+	-- does not work for now
+	pico8_intro()
+
+-- this is where the game flow
+-- actually starts.
+
+-- the game flow:
+
+-- * titlescreen
+-- * bus select
+-- * instructions
+-- * game
+-- * titlescreen
+-- * etc.
+	title_screen()
+
+end
+
+-- splash screen stuff
+
+-- no splash for now :(
+
+function pico8_intro()
+	
+end
+
+function old_pico8_intro()
+	cls(0)
+	
+	palt(11, true)
+	palt(0, false)
+	pal(7,5)
+	for i=0, 32 do
+		cls(0)
+		sspr(pico8.sx, pico8.sy, pico8.sw, pico8.sh, i,48, pico8.dw, pico8.dh)
+		sleep(0.06)
+		sfx(0,2)
+	end
+	
+	sleep(0.2)
+	pal(7,6)
+	sspr(pico8.sx, pico8.sy, pico8.sw, pico8.sh, 32,48, pico8.dw, pico8.dh)
+	sleep(0.2)
+	pal(7,7)
+	sspr(pico8.sx, pico8.sy, pico8.sw, pico8.sh, 32,48, pico8.dw, pico8.dh)
+	pal()
+	sspr(8, 0, 8, 8, pico8.dw+32,48, 16, 16)
+	
+	music(7)
+	
+	sleep(1)
+end
+-->8
+-- update and draw
+
+function _update()
+
+	t = (t + 1) % 8
+	blink_frame = (t == 0)
+
+	if scr.title then
+		title_update()
+	elseif scr.bussel then
+		bussel_update()
+	elseif scr.inst then
+		inst_update()
+	elseif scr.game then
+		game_update()
+	end
+
+	-- fix for psuedo rng
+--	if btnp(0) or btnp(1) or btnp(2) or btnp(3) or btnp(4) or btnp(5) then
+--		srand(rnd(-20,20)+stat(93)-stat(94)+stat(95))
+--	end
+
+end
+
+function _draw()
+
+	if scr.title then
+		title_draw()
+	elseif scr.bussel then
+		bussel_draw()
+	elseif scr.inst then
+		inst_draw()
+	elseif scr.game then
+		game_draw()
+	end
+	
+	-- for 3ds aspect ratio
+	if fix3dsratio==1 then
+		rectfill(0,120,128,128,0)
+	end	
+
+end
+
+-->8
+--other functions
+
+function sleep(s)
+	--for i=1,s*30 do
+		--flip()
+	--end
+end
+
+function rnd_table(table)
+	return table[flr(rnd(#table))+1]
+end
+
+function printfill(str, x, y, col, fcol)
+	local x1 = 0
+
+	x1 = (x - 1) + (#str * 4)
+
+	rectfill(x - 1, y - 1, x1, y + 5 , fcol)
+	print(str, x, y, col)
+end
+
+function print_centered(str, y, col, colf)
+
+	if colf != -1 then
+		rectfill(63 - (#str * 2), y - 5, 63 + (#str * 2), y + 1 , colf)
+	end
+
+	print(str, 64 - (#str * 2), y - 4, col)
+end
+
+-- "music"
+
+function pain()
+	if mus_update > 0 then
+		mus_update -= 1
+	elseif scr then
+
+		--if (stat(16) == -1) and (stat(17) == -1) or (stat(18) == -1) and (stat(19) == -1) then
+			sfx(4, -1, flr(rnd(31)), 1)
+			sfx(5, -1, flr(rnd(31)), 1)
+		--end
+
+	mus_update = 4
+	end
+end
+
+function killsound()
+	for i=0,3,1 do
+		sfx(-1,i)
+	end
+	
+	-- eumulator incorrectly
+	-- interprets this as music(0)
+	--music(-1)
+	
+	
+	mus_update = 1
+end
+
+
+
+function hcenter(s)
+	-- screen center minus the
+	-- string length times the 
+	-- pixels in a char's width,
+	-- cut in half
+	return 64-#s*2
+end
+ 
+function vcenter(s)
+	-- screen center minus the
+	-- string height in pixels,
+	-- cut in half
+	return 61
+end
+-->8
+-- bus stuff
+
+function d_tires(p, bus)
+	local flip = false
+
+	if p==0 then
+		palt(11, true)
+		palt(0, false)
+		pal(2, 0)
+		pal(15, 0)
+		pal(12, 7)
+	elseif p==1 then
+		pal(2, 7)
+		pal(15,0)
+		pal(12, 0)
+	elseif p==2 then
+		flip = true
+		pal(2, 0)
+		pal(15, 0)
+		pal(12, 7)
+	elseif p==3 then
+		pal(2, 0)
+		pal(15,7)
+		pal(12, 0)
+	end
+	
+	
+	-- flip is broken by emulator
+	-- use seperate sprite for flip
+	if flip then
+		sspr(88, 8, 3, 3, pos+(2*(bus.w1sx-bus.sx)), bus.dy+(2*(bus.wsy-bus.sy)), 6, 6)
+		sspr(88, 8, 3, 3, pos+(2*(bus.w2sx-bus.sx)), bus.dy+(2*(bus.wsy-bus.sy)), 6, 6)
+	else
+		sspr(32, 24, 3, 3, pos+(2*(bus.w1sx-bus.sx)), bus.dy+(2*(bus.wsy-bus.sy)), 6, 6)
+		sspr(32, 24, 3, 3, pos+(2*(bus.w2sx-bus.sx)), bus.dy+(2*(bus.wsy-bus.sy)), 6, 6)
+	end
+	
+	pal()
+end
+
+-- this function is really just
+-- me being lazy.
+
+function drawbus(bus)
+
+	if bus.id==7 then
+		palt(1, true)
+	end
+	
+	palt(11, true)
+	palt(0, false)
+	
+	sspr(bus.sx, bus.sy, bus.sw, bus.sh, pos,bus.dy, bus.dw, bus.dh)
+	d_tires(wanim, bus)
+	
+	palt(0, true)
+	palt(11, false)
+	
+	if bus.id==7 then
+		palt(1, false)
+	end
+	
+end
+
+function drawloge()
+	palt(11, true)
+	palt(0, false)
+
+	if loge.flipped then
+
+		if wanim==0 then
+			spr(11, pos, 104, 1, 1, loge.flipped)
+			spr(12, pos, 96, 1, 1, loge.flipped)
+			spr(10, pos+8, 104, 1, 1, loge.flipped)
+		elseif wanim==1 then
+			spr(11, pos, 104, 1, 1, loge.flipped)
+			spr(12, pos, 96, 1, 1, loge.flipped)
+			spr(9, pos+8, 104, 1, 1, loge.flipped)
+		elseif wanim==2 then
+			spr(9, pos+7, 104, 1, 1, loge.flipped)
+			spr(11, pos, 104, 1, 1, loge.flipped)
+			spr(12, pos, 96, 1, 1, loge.flipped)
+		elseif wanim==3 then
+			spr(10, pos+7, 104, 1, 1, loge.flipped)
+			spr(11, pos, 104, 1, 1, loge.flipped)
+			spr(12, pos, 96, 1, 1, loge.flipped)
+		end
+
+	else
+
+		if wanim==0 then
+			spr(10, pos, 104, 1, 1, loge.flipped)
+			spr(11, pos+8, 104, 1, 1, loge.flipped)
+			spr(12, pos+8, 96, 1, 1, loge.flipped)
+		elseif wanim==1 then
+			spr(9, pos, 104, 1, 1, loge.flipped)
+			spr(11, pos+8, 104, 1, 1, loge.flipped)
+			spr(12, pos+8, 96, 1, 1, loge.flipped)
+		elseif wanim==2 then
+			spr(9, pos+1, 104, 1, 1, loge.flipped)
+			spr(11, pos+8, 104, 1, 1, loge.flipped)
+			spr(12, pos+8, 96, 1, 1, loge.flipped)	
+		elseif wanim==3 then
+			spr(10, pos+1, 104, 1, 1, loge.flipped)
+			spr(11, pos+8, 104, 1, 1, loge.flipped)
+			spr(12, pos+8, 96, 1, 1, loge.flipped)	
+		end
+	end
+
+	palt(0, true)
+	palt(11, false)
+end
+-->8
+-- title screen
+function title_screen()
+	
+	scr.bussel = false
+	scr.inst = false
+	scr.game = false
+	
+	if multi_run then
+		killsound()
+	end
+	
+	--srand()
+	srand(0)
+
+  sspr(64, 64, 64, 64, 0, 0, 128, 128)
+
+  printfill("presiona a+b!", 64, 72, 10, 8)
+  
+  -- for 3ds aspect ratio
+  if conssel==1 then
+   print_centered("by superpositivep", 90-2, 7, 8)
+  	print_centered("original by tom maneiro", 100-2, 7, 8)
+  	print_centered("pic: marcopolo paradiso 1800d", 110-2, 7, 8)
+  	print_centered("made in pennsylvania", 120-2, 10, 8)
+		else
+	   print_centered("by superpositivep", 90, 7, 8)
+  	print_centered("original by tom maneiro", 100, 7, 8)
+  	print_centered("pic: marcopolo paradiso 1800d", 110, 7, 8)
+			print_centered("made in pennsylvania", 120, 10, 8)
+		end
+  palt()
+
+  palt(11, true)
+  palt(0, false)
+  sspr(32, 0, 40, 8, 30, 36, 80, 16)
+  sspr(32, 8, 32, 8, 30, 52, 64, 16)
+  pal()
+	
+  scr.title=true
+
+end
+
+function title_update()
+	if btnp(4) or btnp(5) and scr.title then
+		bussel()
+	end
+	
+	pain()
+end
+
+function title_draw()
+  if blink_frame then
+
+    palt(11, true)
+    palt(0, false)
+    
+    -- fake-08 arithmatic error
+    --pal(7, rnd(title_rainbow))
+    
+    -- fixed!
+    pal(7, rnd_table(title_rainbow))
+    
+    sspr(32, 0, 40, 8, 30, 36, 80, 16)
+    sspr(32, 8, 32, 8, 30, 52, 64, 16)
+
+    pal()
+    if txt_flash then
+      txt_flash = false
+      sspr(94, 99, 28, 5, 60, 70, 56, 10)
+    else
+      txt_flash = true
+      printfill("presiona a+b!", 64, 72, 10, 8)
+    end
+
+  end
+end
+
+-->8
+-- bus selection
+
+function bussel()
+	scr.title = false
+	scr.inst = false
+	scr.game = false
+
+	-- do not killsound on bus sel
+	
+	--killsound()
+	
+	-- fake-08 arithmatic error
+	--buscol = rnd(bus_rainbow)
+	
+	-- fixed!
+	buscol = rnd_table(bus_rainbow)
+
+	--srand()
+	srand(0)
+
+	scr.bussel = true
+
+	busid = defbus
+end
+
+function bussel_update()
+
+	if btnp(5) then
+		-- to instructions on a
+		inst()
+	elseif btn(0) and btn(1) then
+		-- nothing lol
+	elseif btnp(0) then
+		busid -= 1
+		idcheckup()
+	elseif btnp(1) then
+		busid += 1
+		idcheckup()
+	end
+	
+	pain()
+
+end
+
+function bussel_draw()
+	cls()
+	pal()
+	map(16,0,0,0,16,16)
+	
+	tbus=busbyid[busid]
+	
+	busportiat(tbus)
+	drawbus_bussel(tbus)
+	
+	infostr1=tbus.name.."\n\nbrand: "..tbus.brand.."\norigin: "..tbus.origin.."\nheight: "..tbus.height.."\n\n"..tbus.flavor1.."\n"..tbus.flavor2.."\n"..tbus.flavor3.."\n\n==>select a bus!<=="
+	
+	printfill(tbus.name,4,4,5,12)
+	
+	printfill("brand: "..tbus.brand,4,16,5,12)
+	printfill("origin: "..tbus.origin,4,22,5,12)
+	printfill("height: "..tbus.height,4,28,5,12)
+	
+	printfill(tbus.flavor1,4,40,5,12)
+	printfill(tbus.flavor2,4,46,5,12)
+	
+	if #tbus.flavor3!=0 then
+		printfill(tbus.flavor3,4,52,5,12)
+	end
+	
+	printfill("==>select a bus!<==",4,64,5,12)
+	
+	printfill("motor:",86,76,5,12)
+	printfill(" "..tbus.motorhp,86,82,5,12)
+	
+	printfill("occupancy:",86,92,5,12)
+	printfill("  "..tbus.passangers,86,98,5,12)
+	
+	printfill("controls:",86,108,5,12)
+	printfill(" ⬅️ ➡️ a   ",86,98+16,5,12)
+	
+end
+
+function idcheckup()
+	if (busid<1) busid=#busbyid
+	if (busid>#busbyid) busid=1
+end
+
+function busportiat(bus)
+
+	-- no portrait for pico-8 logo
+	if busid != 7 then
+		rectfill(#"==>select a bus!<=="+3,73,#"==>select a bus!<=="+4+(4*8),74+(3*8), 0)
+		spr(bus.psprite,#"==>select a bus!<=="+4,74,4,3)
+	else
+		sspr(pico8.sx, pico8.sy, pico8.sw, pico8.sh, #"==>select a bus!<=="-11,88, pico8.dw, pico8.dh)
+	end
+
+end
+
+function drawbus_bussel(bus)
+
+	sel_dx = 15
+	sel_dy = 102
+	
+	palt(0, false)
+	palt(11, true)
+	
+	if (busid==3) sel_dy+=2
+
+	if busid != 8 and busid != 7 then
+		
+		rectfill(sel_dx-2,sel_dy-2,sel_dx+53,102+bus.dh+2, 11)
+		
+		sspr(bus.sx, bus.sy, bus.sw, bus.sh, sel_dx, sel_dy, bus.dw, bus.dh)
+		
+		pal(2, 0)
+		pal(15, 0)
+		pal(12, 7)
+		
+		sspr(32, 24, 3, 3, sel_dx+(2*(bus.w1sx-bus.sx)), sel_dy+(2*(bus.wsy-bus.sy)), 6, 6)
+		sspr(32, 24, 3, 3, sel_dx+(2*(bus.w2sx-bus.sx)), sel_dy+(2*(bus.wsy-bus.sy)), 6, 6)
+		pal()
+	elseif busid==7 then
+		-- nothing lol
+	else
+		-- loge specific stuff
+		
+		sel_dx = 30
+		sel_dy = 112
+		
+		palt(11, false)
+	
+		spr(10, sel_dx, sel_dy, 2, 1)
+		spr(12, sel_dx+8, sel_dy-8, 1, 1)
+	end
+	
+end
+-->8
+-- instructions
+
+-- no instruction screen for
+-- now :(
+
+function inst()
+	game()
+end
+
+function old_inst()
+	scr.title = false
+	scr.game = false
+	scr.bussel = false
+	scr.inst = true
+	
+	killsound()
+	-- fake-08 arithmatic error
+	--srand()
+	srand(0)
+	
+	instcount=3
+	
+	inst_draw_real()
+	
+	for i=3, 0, -1 do
+		sleep(1)
+		instcount-=1
+		inst_draw_real()
+		if (i!=0) sfx(1)
+	end
+	
+	game()
+	
+end
+
+function inst_draw_real()
+	cls()
+	sspr(64, 64, 64, 64, 0, 0, 128, 128)
+	
+	palt(11, true)
+	palt(0, false)
+	sspr(32, 0, 40, 8, 30, 4, 80, 16)
+	sspr(32, 8, 32, 8, 30, 52-32, 64, 16)
+	pal()
+	
+	printfill("** controls **", hcenter("** controls **"),38,5,12)
+	printfill("⬅️ move bus backwards ", 20,56,5,12)
+	printfill("➡️ move bus forwards ", 20,64,5,12)
+	printfill("a horn/beep ", 20,72,5,12)
+	printfill("b return to titlescreen ",20,80,5,12)
+	
+	printfill("prepare...",50,120,5,12)
+
+	if (instcount==3) then
+		print("3333\n   3\n  33\n   3\n3333",102,96,12)
+	elseif (instcount==2) then
+		print("2222\n   2\n2222\n2    \n2222",102,96,12)
+	elseif (instcount==1) then
+		print("  11\n   1\n   1\n   1\n  111",98,96,12)
+	else
+		print("0000\n0  0\n0  0\n0  0\n0000",102,96,12)
+	end
+
+end
+
+function inst_update()
+
+end
+
+function inst_draw()
+
+end
+-->8
+-- game
+
+function game()
+	scr.title = false
+	scr.bussel = false
+	scr.inst = false
+	
+	-- reset variables each game
+	
+	pos = 0
+	wanim = 0
+	score = 0
+	loge.flipped = false
+	
+	scr.game = true
+	
+	multi_run = true
+	
+	killsound()
+	
+	if (busid!=8) sfx(6, 3)
+end
+
+function game_update()
+
+	-- this is self-explanatory
+	
+	if (pos > 160) pos = -120
+	if (pos < -120) pos = 160
+	
+	if btn(1) and btn(0) then
+		--nothing lol
+	elseif btn(1) then
+		score += 1
+		pos += 1
+		wanim += 1
+		sfx(0, 2)
+		
+		if (busid==8) loge.flipped=false
+		
+	elseif btn(0) then
+		score -= 1
+		pos -= 1
+		wanim -= 1
+		sfx(0, 2)
+		
+		-- stat causes nil error
+		-- no workaround for backup
+		-- beep sfx yet
+		--if (stat(17)==-1 and busid!=8) sfx(3,1)
+		
+		--if (busid!=8) sfx(3,1)
+		
+		if (busid==8) loge.flipped=true
+		
+	end
+	
+	if (wanim < 0) wanim = 3
+	if (wanim > 3) wanim = 0
+	
+	-- beep on a
+	if btn(5) and busid!=8 then
+		sfx(1, 0)
+		sfx(2, 1)
+	elseif btn(5) and busid==8 then
+		sfx(9, 0)
+	end
+	
+	-- jump to title on b
+	if (btn(4)) title_screen()
+	
+	
+end
+
+function game_draw()
+	cls(13)
+	stage()
+	print("travel: "..score, 4, 36,bgcolpal)
+
+	if busid==8 then
+		drawloge()
+	else
+		game_pal(busbyid[busid])
+		drawbus(busbyid[busid])
+	end
+	pal()
+	stageinfotag(busbyid[busid])
+
+end
+
+function stage()
+
+	palt(11, true)
+	palt(0, false)
+	
+	pal(15,bgcolpal)
+	map(0,0,0,0,16,16)
+	pal(15,15)
+	
+	palt(0, true)
+	palt(11, false)
+	
+	--print build info under logo
+	print("ver. "..version,75,25,bgcolpal)
+	print(codename,95,31)
+	print(console,95,31+(31-25))
+	
+	--print back to title button
+	print("b = title",4,4)
+	
+	--draw the crooked post
+	--fillp(▒)
+	rectfill(64,106,68,111,bgcolpal)
+	rectfill(59,96,63,105,bgcolpal)
+	rectfill(54,90,58,96,bgcolpal)
+	rectfill(50,75,54,96-7,bgcolpal)
+	--fillp()
+	print("\129",55,70,bgcolpal)
+	print("\129",55-7,70-5,bgcolpal)
+	print("\129",55+7,70-5,bgcolpal)
+	print("\129",55,70-10,bgcolpal)
+	
+	--draw the normal posts
+	drawpost(10)
+	drawpost(114)
+	
+end
+
+function stageinfotag(bus)
+	
+	-- buses 7 and 8 are not buses
+	if bus.id!=7 and bus.id!=8 then
+		print("your bus:", 4, 14)
+	else
+		print("your \"bus\":", 4, 14)
+	end
+	
+	print("["..bus.brand.."]", 4, 20)
+	print(bus.name, 4, 26)
+	
+end
+
+function game_pal(bus)
+	
+	if (bus.rndcolor) pal(14, buscol)
+	
+end
+
+function drawpost(x)
+	--fillp(▒)
+	
+	rectfill(x+1,70, x+5, 111, bgcolpal)
+	
+	print("\129",x,70,bgcolpal)
+	print("\129",x-7,70-5,bgcolpal)
+	print("\129",x+7,70-5,bgcolpal)
+	print("\129",x,70-10,bgcolpal)
+	
+	--fillp()
+end
+__gfx__
+cccccccc0080000055555555bffbbffbb8888bb888888888888888888888888888bbbbbbbbbbbbbbbbbbbbbbbb0ee0bbbbbbbbbbeeeeeeeeeeeeeeeeeeeeeebb
+cccccccc097f000055555555fbbffbbf8888bb888888888888888888888888888bbbbbbbbb000000bb0000000000000bbbbbbbbbeccc1111c1111c111ecc55cb
+cc888888a777e00055555555bffbbffbbbbbbb888888888888888888888888888bbbbbbbb0ffffffb0fffffff0ffff0bbbbbbbbbeecc1111c1111c111ee5cc5c
+c877878c0b7d1000fbbffbbffbbffbbfb888b888888888888888888888888888bbbbbbbb0ff444440ff444440f7070f0bbbbbbbbeecc1111c1111c1111e5cc5e
+c878877c00c10000bffbbffbbffbbffb888bb777877788778877877787878877bbbbbbbb0f4444440f4444440fff0ff0bbbbbbbb85eeeeeeeeeeeeeaeee5555c
+888888cc00000000fbbffbbffbbffbbfbbbbb78788788788878787878787878bbbbbbbbb0f4444440f4444440ff000f0bb0000bb85555555555555555555ee5c
+c0cc0ccc00000000bffbbffbbffbbffb888b777787887888787877788787877bbbbbbbbb0f4440000f44444440ffff0bbb0550bbee5e5bbb5aeeeea5bbba555a
+cccccccc00000000fbbffbbffbbffbbfbbbb788887887888787878787878887bbbbbbbbbb0000bbbb0000000000000bbbb0550bbbeee5bbb5eeeeee5bbb5eeee
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb888b78887778877877887778777877bbeeeeeeeeeeeeeeeeeeeeeebb02cbbbbb00000000000000000000000000000000
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb88888888888888888888888888bbe5511511151151151115117bf5fbbbbb00000000000000000000000000000000
+bb7777b7777bb777bb7777bbbbb7777b88b888888888888888888888888888bbe5511511151151151115111bc20bbbbb000000000000006dd600000000000000
+b771771b771177111771771bbbb71171bbb88880008888888888880008888bbbeeeeeeeeeee66eee11155511bbbbbbbb0000000000000d555d00000000000000
+b777771b771b771bb77177177b77777188b88800500888888888800500888bbb111111111161161151151151bbbbbbbb0000000000006555ee66666000000000
+b771111b771b771bb771771b11771171bbbbbb05550bbbbbbbbbb05550bbbbbb8e00eeeeee6ee63eeeee1151bbbbbbbb000000000000601ee55dfffff6000000
+b771bbb7777b7777b777711bbb777771bbbbbb00500bbbbbbbbbb00500bbbbbb8ee0ebbbae65e65ebbbaeeeabbbbbbbb000000000000062e55dffffffff00000
+bbbbbbbb1111b111bb1111bbbbb11111bbbbbbb000bbbbbbbbbbbb000bbbbbbbbbeeebbbee6ee6eebbbeeeebbbbbbbbb000000000000062554ffffffffff0000
+ccc8888cc8888888888888888888888cbeeeeeeeeeeeeeeeeee000b00bbbbbbbb111111111111111111111bb000000000000000000000d244ffffffff6ff0000
+cc8888cc88887777778877777788888ce0505550555055505550500bb0bbbbbbc1ccdcccdcccdccc1dd000cb000000000000000d606644444fff6ffff66ff000
+cccccccc88887777778877777788888ce5505550555055505550005bbbbbbbbbc1ccdcccdcccdccc1dd0dd0b000000000000000d244444442ffd6fff655fe000
+ccc888c88887788778877887778888cce55055505550555000005005bbbbbbbbc1ccdcccdcccdcc11dd0ddd00000000000000644424444444ffffffffddff600
+cc888cc88887788778877887788888cc80eeeeeee0eeeeeeeee05505bbbbbbbb811111111111111110d00dd00000000000006444224444444efffeeeffdff600
+ccccccc8888777777887777888888ccc8000055500555500555e0000bbbbbbbb810000000000000000000dd000000000000044444444444444feeeeeeddfe000
+cc888c88888777777887777788888ccc55ee5bbb50e00ee5bbb5eeeabbbbbbbb11001bbb11111111bbb1111a00000000000644d44444444444eeeeeee4eff000
+cccccc88888778888887788778888cccb5ee5bbb50eeeee5bbb5eeebbbbbbbbbb1111bbb11111111bbb1111b00000000000d444444444444442eeeeee44f0000
+cc888c8888778888887778877888ccccc20bbbbbbb9999999999999999bbbbbbbeeeeeeeeeeeeeeeeeeeeeb66bbbbbbb000d44444444444444424eeeeed00000
+cccccc8888778888887777777888ccccf5fbbbbbb8c9cc9cc9cc9cc9c99bbbbbe55555555555555555e555ebb6bbbbbb0006444444444444222222222d000000
+cc88c88888778888887777778888cccc02cbbbbbb9c9cc9cc9cc9cc9cc99bbbbe44544544544544544e455ebbbbbbbbb00002442244222222222222d60000000
+ccccc8888000888888880008888cccccbbbbbbbbb89a0aa0aa0a9a59cc55999bee4544544544544544e444eebbbbbbbb00006522222222222222d60000000000
+cc88c8880050088888800500888cccccbbbbbbbbb890aa0aa0aa91199999995beeeeeeeeeeeeeeeeeeee44eeebbbbbbb000000d51111111dd660000000000000
+cccccccc05550cccccc05550ccccccccbbbbbbbbb9999bbb99999119bbb999abe5eee555ee5ee5ee555ee4eeebbbbbbb00000000000000000000000000000000
+cccccccc00500cccccc00500ccccccccbbbbbbbb55555bbb55599999bbb99555e05e5bbb5e05e0e5bbb5eeeeebbbbbbb00000000000000000000000000000000
+ccccccccc000cccccccc000cccccccccbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbeee5bbb5eeeeee5bbb5eeebbbbbbbbb00000000000000000000000000000000
+7777777777765000110100000000000015511111111111151677777777777777666d515dddddd5ddd1ddddd66666d66677777777777777d5555dd555d6777777
+777777777777d555155110000000000055555111151111111067777777777777d666555d66ddd5d66dd6dddd66d6d66677777777777776dd6d11d55556777777
+677777777776d6111115310000000000115555551111111111577777777777775d5d5555ddd55555555555d6666dd666777777777777776dd55555555dd77777
+7777777777776761115551000000000055115555000000011056777777777777555555dd555511111111155ddd5ddd55777777777777776555dd5d115d677777
+677777777776d55110055510100000005511550000000000111d6777777777775555555511551000111111d55555dd557777777777777765151515d157677777
+6777777776d161d10000000100000000555110000000000011176667777777775d555555555511001000115d5555dd25777777777777777666666ddd66777777
+d7776776ddd6ddd151111101000000006555000000000001515766677777777755d55555555510001001115ddddd6d257777777777777666666666ddddd555d7
+d66ddd6d666755d15ddd0001000000007677600000000005515667777777777755555555555511011111115ddddd6d25776d6d555511111111110010000110d7
+155500566d5dd5d5000000000dd5d000767660000000000150d6677777777777555555555555511111111155d6dd6d25dd5161111111111111000000000000d6
+d156d55555511155500000011665d10076d5d00000000001106666677777777755555555255dd1111115111556dd6d5d1d11611111111111100010000015dd66
+5555550511dd15115000000006766500d51551110000000111dd76677777777755555555255dd11111115155565d655d1d116dddddddd6d66666666d5d66d666
+005005115d5155555111511015511500ddddd50000000105dd505dd67775dd5d555555552d555111111151555d55655d1d1d666776d66d66666676d11dd15d6d
+7776f6dffd15ddd6450111115d000000dddd6dd11011100d6d111105d6655555555555222d511111111155555555dd1516666666666666666666d511111555dd
+7777ff6ff77d5dd45550000000000000551516505000000d6d155d66651000115555551225515111111555555555dd151666d511d6666777667d1111011555dd
+7777fffff777d511100000000000000055551501100005ddd515d5dd555ddddd1111101225515111111555555555d5001666d55dd7777777666111dd01555555
+d66776f7666776551000000000000000511510001000000001555111510dd1111111110125511115111555551555d511566615d6166ddddddd11105500011151
+6666666666666666666666666667666665d511101100111555111115555d51111111110025511151111555551555d51111110000000111111000000000001115
+66666666666666666666666666666666d555111010011155511111011100010155555110155255211111555d5555d511d1111111111555555551111100111115
+66666666666666666666666666666666d56d551100015511111111110011111155555111055d5522222255dd11555d55d5511111155515555551111111111115
+66666666666ddddddd66666666666666d555111111111555511111000111111155511111101dddd222525d6611551111dd511155551155555551111111111115
+666666666d0000000d655d6666666666777d001111111111111110001111111155551111101dddddddddddd601151115dd511555515155555551111111111111
+666666666d0000001f6000005d66666676d51111011111101111000111111111555511111115dddddd5ddddd01111111dd551115555515555511111111111115
+666666666df55dffff76dd1000056666115d66ddd5111111110000011111111155555111111155555555511111111111dd551555155555555511111111111111
+766d66666deddd6d6f777777766d50015d666666d5000000000000011111111115555111111100000000555555555551d5555155151555551111111111111111
+6dd554455d5000022677ffffd6665555666666666666666667766666666666660000000000000000000000000000000000000000000000000000000000000000
+f4d42422256555ddf677777600054444666666666666676777666666666666660000000000000000000000000000000000000000000000000000000000000000
+5454445445000015d5ddd666494d4444666666666667777777677776666666660000000000000000000000000000000000000000000000000000000000000000
+9e49994994252025554446dd5dd59999666666666666777776677777666666760000000000000000000000000000000000000000000000000000000000000000
+99f999994400000000000dd500004499666666666fffff7776677766766666660000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000224456666ddd4d5525444eeffffff66666660000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000055d6d55551000000000125222444ee660000000000000000000000000000000000000000000000000000000000000000
+000000000000000000000000000000005555d55551000000000000000000000d0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000055555555500000000000000000000005d66d6666d6d6d5dd56d566d6d5d5d55dddd6666d666667777777777777777777
+00000000000000000000000000000000555d5ddd1000000000000000000000055d5ddd565ddd55555dd5665dd5dd5555dd5dd666666666666666776777777777
+000000000000000000000000000000005dfffff4552444444444222222222555555dd6d65d76d5555d55dd55dddd5d5dd6ddddd5dd666d666666666767777777
+00000000000000000000000000000000dfffff44444444444444444444444444d5ddd67667776d555d5555dd55ddddddd5d5d5ddd5d666d666d6666777777777
+00000000000000000000000000000000d55ff440000000111115555551111115d6dd5d6767776d555d55555d55ddd55d5d55dd666ddd666dd666666676677777
+00000000000000000000000000000000d4fff445444444444444444441444444d6dd5d7777776d5555dd6666777777777777766655ddddd6666d666766677777
+0000000000000000000000000000000051100000044444444444444451544444dd5d566777776767777777777777777777777777777655d6ddd6d66766677777
+00000000000000000000000000000000d000005515444444444444441554444d56d55dd77777777777777666666d666666777777777776666ddd666666677777
+00000000000000000000000000000000d10000515544444444445551155555555765d66777766766d666666666d66666667677777777777766666666d6777777
+00000000000000000000000000000000510010151555555511100111555555555ddd67766dd666666666666666c6666666777777777776777777666666677777
+00000000000000000000000000000000dd551100011555555ddddddddddddddd5d77777766666666666666666666666666777777777777766777776666666667
+00000000000000000000000000000000555555dddddddddd66d6666ddddddddddd5d667666c6666666666666666666666677777777777777777777777666766f
+0000000000000000000000000000000055ddddddddddddddd6dddddddddddddd55555d76666666666666666cc66666666677777777777777777777777777f6d6
+00000000000000000000000000000000ddddddddddddddd6d66666dddddddddd77dd5676666666666666666c6666666667777777777777777777777777777766
+00000000000000000000000000000000dddddddddddddddddddddddddddddddd777767766666666666666666c666666667777777777777777777777777777777
+0000000000000000000000000000000055ddddddddddddddddddddddddddddddf777776666666666666666666666666667777777777777777777777777777777
+000000000000000000000000000000006667767777776666666666767666666667f67766666666666666666c6c66666667777777777777777777777777777776
+00000000000000000000000000000000666777766666677666666676666666666776776666666666666666c66666666667777777777777777777777777666666
+0000000000000000000000000000000015dd6776d555d66dddd66666666666666776766666666666666666c666666666677777777777777777777777666ddddd
+000000000000000000000000000000001111166d5555dd555555d6666666666667777666c66666c66c666666666666667777777777777777777777666d56ddd6
+000000000000000000000000000000005111155555d5115111111555d6666666d667766666666666666c6666666666667777777777777777777776666ddddd6d
+0000000000000000000000000000000055555555555551155111155dd6dddddddef76666666666666666d66666666667767766666777777777776666dddddddd
+000000000000000000000000000000001115155dddd6776666666666666651116d67d666dd66666dddddd6cd666666667ddd5555dd7777777776d666dddddddd
+000000000000000000000000000000001115677776666666666ddddddddd5511767766666ddd666666677777777777777d5555555577777777667766dddddddd
+00000000000000000000000000000000111dd66e51111111111111111111155177777777777777777777777777777777755555555d77777676fe777777766ddd
+00000000000000000000000000000000111de6ed11111111111111111111115577777777ff7777777777777777777777755555555d7777676ffef77777777776
+000000000000000000000000000000001115ddd50111111111111555555551557777777fff7777777777777777777777755555555d776d7764feef7777777777
+0000000000000000000000000000000011155551515ddddddddd6dddddddd5d567777777777776666666dd6666666777655555555d76d677ffffedf77777f677
+000000000000000000000000000000000011555151d6dd66666dddddddd5dddd566dd55d5666666666666667777777776d5555555d7d677764444d6777777767
+000000000000000000000000000000001155155111d6ddddddddddddddd5d6dd5566d6d6d77776666677777777777777d55555555d6d777776effe7676677767
+00000000000000000000000000000000ff6d5d5115d666d6ddd6d5511dd56f66666d7777777777666666666666777776d55555555dd777777744467676767666
+00000000000000000000000000000000eff776dd66d1ddddddddd111155d555d66d666dd66777676666666d555d77776d55555555dd7d6677776677d66666676
+00000000000000000000000000000000ff777766d611dddddddd51111115555566dd6655dd677676666666d666677776555555556d675555555d66dd66667676
+0000000000000000000000000000000066f777f6dd115d55551111555ddedeee6d7d77ddd667766666776d66ddd7777655555555dd775555555555555555ddd6
+00000000000000000000000000000000ffff666dd5111555ddddeeeeeedddddd6d76676d5d7766666666d5555557777755d55555567655555555555555555d55
+00000000000000000000000000000000ffffffffffffeeefffeeeeeddeddddd56d76666655d75677766655555557777755555555577655555555555ddddd5d65
+00000000000000000000000000000000fffffffffffffff6ff6666dddd5555556d66d66d555dd677777655555557776755555555577655555555555dddddd66d
+00000000000000000000000000000000ffffffffffffff666dddd55555551551d566d66d555d6d77777d555555d7776755555555577655555555555dd6d66d65
+00000000000000000000000000000000ffffffff6f6ddddddd555555555555555566d66d55ddd66777766666ddd677675555d555577655555555555ddd666d65
+00000000000000000000000000000000ff6edeeeedddddddddddd555555555555566d66d5dddd5d67776666665567dd75555d555d77655555555555dd6dd5d6d
+00000000000000000000000000000000cccccccccccccccccccccccccccccccc5566d66d5d5dd66d667666676d567dd75dd56d555776d5555555555dd5dd5d6d
+00000000000000000000000000000000cccccccccccccc66666ccccccccccccc5566d66d555dd777dd67777765577d67dd6dd555d776dd555555555d5dd6d66d
+00000000000000000000000000000000ccccddcccccc6d5dd65dddd6ccccccccd5d6dddd5ddddd677d5ddd6666d77dd7d66d655d6777dddd55555d6d6ddddd6d
+00000000000000000000000000000000cdddd5dccc6d511d6755dd555dccccccd777dddd5d5dddd6776ddd666d677dd7dd5d5555d7776ddddd55544deded666d
+000000000000000000000000000000006666656666d55156d65511d555dccccc567666dd5d5ddddd677dddddddd775d76d5555dd77777676dd44444ee4ff7666
+0000000000000000000000000000000066666d66d555d116f5555155555dcccc555dddddddd555dd677dd6dddd6775d6d655ddd67777ff644444444ee76dd677
+000000000000000000000000000000006666666ddddd5116f5511155555dd66cd555555ddddd55ddd676d55ddd676dd66ddddf77776eef6e444444e67dd677f7
+0000000000000000000000000000000066666ddddddd555df55d5555555d66f6d555555555dd555d5d5d555555dddd66e4677677f44efd5d44444f76d677f776
+00000000000000000000000000000000666dddddddd55d556ddd5555551556f5777766d5556777765555dd667777777777777ff4444ed6554444f7dd67ff7666
+0000000000000000000000000000000066dddddddd555d65676d555655555545767666677777777777777776677777777777f444444edd555ef7666777776777
+000000000000000000000000000000006ddddd66dd445ddd676d5ddd5555551576d666ddd677777777777776d677777777fe444444445d555776677ff76d677e
+000000000000000000000000000000006dd66666d45d5d5dd7ddddddddddd515766eef666dd66777777777776777777776eeffff77e4ddd556d677ff6dd77f44
+0000000000000000000000000000000066666666d4dd555dd6dd5dddddddd511677ff444e66666666777777777777f77777f66eee44467d55f777f76d67fd444
+00000000000000000000000000000000d444444444d42514fffdd5d5d5555551ff6676de444ee66666ddd77777777f4ee4444444444677655677776d67e44444
+0000000000000000000000000000000055d4444444444554aaaaaffffaaaadd64eee64ed444ee4f666d55d67fff6f444444ee4444447676556f67667f4444444
+00000000000000000000000000000000655444444424444966faaaaaaaaadd5d777777776f666ffffffff4444ef7e44444d4e4444447666554e7777e44455555
+000000000000000000000000000000006d5dddd444514449af6faaaaaaa666d1444eeeef66f777777777777777774444eff66444444766d554ffe55555555555
+00000000000000000000000000000000515dddddd4154449aaaaaaaaaaaaf5dd44e4444444444ff4444444444444e444eee44444444666655555555555555555
+00000000000000000000000000000000dd5100155515444aaaaaaaf6faaa45554444884444efe444444fffffe444644444444444444d666555555555555555dd
+000000000000000000000000000000005555dd5100050549a9aaaaaaaaaa45555444444444444444444777776444444444444455555566555555555555dd6666
+0000000000000000000000000000000055555ddd6d150000011110555555555555555555544444444446677764444444445555555555dd55555555dddd666666
+00000000000000000000000000000000ddd55d5dd5555511115555d66d55ddd555555555555d5d55d555555555544455555555555555555555ddd66666666666
+0000000000000000000000000000000055555555555555ddd5dddddddd6666d55ddd5d5dddddd5555555555555555555555555555555555ddd66666666666666
+000000000000000000000000000000005d55511155d5555ddd6dd55555ddd55ddddddddddd55555555555555555555555555555555ddddd6666666666666d66d
+__label__
+dd6666dd66666666dd66dd66dd55dddd5566dd556666dd66dd55dd55dd5555dddddddd66666666dd666666666677777777777777777777777777777777777777
+dd6666dd66666666dd66dd66dd55dddd5566dd556666dd66dd55dd55dd5555dddddddd66666666dd666666666677777777777777777777777777777777777777
+55dd55dddddd556655dddddd5555555555dddd55666655dddd55dddd55555555dddd55dddd666666666666666666666666666666777766777777777777777777
+55dd55dddddd556655dddddd5555555555dddd55666655dddd55dddd55555555dddd55dddd666666666666666666666666666666777766777777777777777777
+555555dddd66dd6655dd7766dd55555555dd5555dddd5555dddddddd55dd55dddd66dddddddddd55dddd666666dd666666666666666666776677777777777777
+555555dddd66dd6655dd7766dd55555555dd5555dddd5555dddddddd55dd55dddd66dddddddddd55dddd666666dd666666666666666666776677777777777777
+dd55dddddd6677666677777766dd555555dd55555555dddd5555dddddddddddddd55dd55dd55dddddd55dd666666dd666666dd66666666777777777777777777
+dd55dddddd6677666677777766dd555555dd55555555dddd5555dddddddddddddd55dd55dd55dddddd55dd666666dd666666dd66666666777777777777777777
+dd66dddd55dd66776677777766dd555555dd5555555555dd5555dddddd5555dd55dd5555dddd666666dddddd666666dddd666666666666667766667777777777
+dd66dddd55dd66776677777766dd555555dd5555555555dd5555dddddd5555dd55dd5555dddd666666dddddd666666dddd666666666666667766667777777777
+dd66dddd55dd77777777777766dd55555555dddd66666666777777777777777777777777776666665555dddddddddd66666666dd666666776666667777777777
+dd66dddd55dd77777777777766dd55555555dddd66666666777777777777777777777777776666665555dddddddddd66666666dd666666776666667777777777
+dddd55dd556666777777777766776677777777777777777777777777777777777777777777777777777777665555dd66dddddd66dd6666776666667777777777
+dddd55dd556666777777777766776677777777777777777777777777777777777777777777777777777777665555dd66dddddd66dd6666776666667777777777
+5566dd5555dddd7777777777777777777777777777666666666666dd666666666666777777777777777777777766666666dddddd666666666666667777777777
+5566dd5555dddd7777777777777777777777777777666666666666dd666666666666777777777777777777777766666666dddddd666666666666667777777777
+55776655dd6666777777776666776666dd666666666666666666dd6666666666666677667777777777777777777777776666666666666666dd66777777777777
+55776655dd6666777777776666776666dd666666666666666666dd6666666666666677667777777777777777777777776666666666666666dd66777777777777
+55dddddd6677776666dddd666666666666666666666666666666cc66666666666666777777777777777777777766777777777777666666666666667777777777
+55dddddd6677776666dddd666666666666666666666666666666cc66666666666666777777777777777777777766777777777777666666666666667777777777
+55dd7777777777776666666666666666666666666666666666666666666666666666777777777777777777777777776666777777777766666666666666666677
+55dd7777777777776666666666666666666666666666666666666666666666666666777777777777777777777777776666777777777766666666666666666677
+dddd55dd666677666666cc66666666666666666666666666666666666666666666667777777777777777777777777777777777777777777777666666776666ff
+dddd55dd666677666666cc66666666666666666666666666666666666666666666667777777777777777777777777777777777777777777777666666776666ff
+5555555555dd7766666666666666666666666666666666cccc6666666666666666667777777777777777777777777777777777777777777777777777ff66dd66
+5555555555dd7766666666666666666666666666666666cccc6666666666666666667777777777777777777777777777777777777777777777777777ff66dd66
+7777dddd55667766666666666666666666666666666666cc66666666666666666677777777777777777777777777777777777777777777777777777777776666
+7777dddd55667766666666666666666666666666666666cc66666666666666666677777777777777777777777777777777777777777777777777777777776666
+777777776677776666666666666666666666666666666666cc666666666666666677777777777777777777777777777777777777777777777777777777777777
+777777776677776666666666666666666666666666666666cc666666666666666677777777777777777777777777777777777777777777777777777777777777
+ff777777777766666666666666666666666666666666666666666666666666666677777777777777777777777777777777777777777777777777777777777777
+ff777777777766666666666666666666666666666666666666666666666666666677777777777777777777777777777777777777777777777777777777777777
+6677ff6677776666666666666666666666666666666666cc66cc6666666666666677777777777777777777777777777777777777777777777777777777777766
+6677ff6677776666666666666666666666666666666666cc66cc6666666666666677777777777777777777777777777777777777777777777777777777777766
+66777766777766666666666666666666666666666666cc6666666666666666666677777777777777777777777777777777777777777777777777666666666666
+66777766777766666666666666666666666666666666cc6666666666666666666677777777777777777777777777777777777777777777777777666666666666
+6677776677666666666666666666666688888888666688888888888888888888888888888888888888888888888888888877777777777777666666dddddddddd
+6677776677666666666666666666666688888888666688888888888888888888888888888888888888888888888888888877777777777777666666dddddddddd
+6677777777666666cc6666666666cc888888886666888888888888888888888888888888888888888888888888888888777777777777666666dd5566dddddd66
+6677777777666666cc6666666666cc888888886666888888888888888888888888888888888888888888888888888888777777777777666666dd5566dddddd66
+dd666677776666666666666666666666666666cc66888888888888888888888888888888888888888888888888888888777777777766666666dddddddddd66dd
+dd666677776666666666666666666666666666cc66888888888888888888888888888888888888888888888888888888777777777766666666dddddddddd66dd
+ddeeff7766666666666666666666666688888866888888888888888888888888888888888888888888888888888888777777777766666666dddddddddddddddd
+ddeeff7766666666666666666666666688888866888888888888888888888888888888888888888888888888888888777777777766666666dddddddddddddddd
+66dd6677dd666666dddd6666666666888888dddd7777778877777788887777888877778877777788778877888877777777777766dd666666dddddddddddddddd
+66dd6677dd666666dddd6666666666888888dddd7777778877777788887777888877778877777788778877888877777777777766dd666666dddddddddddddddd
+776677776666666666dddddd6666666666666677778877888877888877888888778877887788778877887788778877777777666677776666dddddddddddddddd
+776677776666666666dddddd6666666666666677778877888877888877888888778877887788778877887788778877777777666677776666dddddddddddddddd
+7777777777777777777777777777778888887777777777887788887788888877887788777777888877887788777777667766ffee777777777777776666dddddd
+7777777777777777777777777777778888887777777777887788887788888877887788777777888877887788777777667766ffee777777777777776666dddddd
+7777777777777777ffff777777777777777777778888888877888877888888778877887788778877887788888877667766ffffeeff7777777777777777777766
+7777777777777777ffff777777777777777777778888888877888877888888778877887788778877887788888877667766ffffeeff7777777777777777777766
+77777777777777ffffff7777777777888888777788888877777788887777887777888877777788777777887777dd77776644ffeeeeff77777777777777777777
+77777777777777ffffff7777777777888888777788888877777788887777887777888877777788777777887777dd77776644ffeeeeff77777777777777777777
+667777777777777777777777776666666666668888888888888888888888888888888888888888888888888888667777ffffffffeeddff7777777777ff667777
+667777777777777777777777776666666666668888888888888888888888888888888888888888888888888888667777ffffffffeeddff7777777777ff667777
+556666dddd5555dd556666666666668888668888888888888888888888888888888888888888888888888888887777776644444444dd66777777777777776677
+556666dddd5555dd556666666666668888668888888888888888888888888888888888888888888888888888887777776644444444dd66777777777777776677
+55556666dd66dd66dd7777777766666666668888888800000088888888888888888888888800000088888888777777777766eeffffee77667766667777776677
+55556666dd66dd66dd7777777766666666668888888800000088888888888888888888888800000088888888777777777766eeffffee77667766667777776677
+666666dd777777777777777777776688886688888800005500008888888888888888888800005500008888887777777777774444446677667766776677666666
+666666dd777777777777777777776688886688888800005500008888888888888888888800005500008888887777777777774444446677667766776677666666
+6666dd666666dddd666677777766776666666666660055555500dd7777777766dd5555550055555500dddd77dd66667777777766667777dd6666666666667766
+6666dd666666dddd666677777766776666666666660055555500dd7777777766dd5555550055555500dddd77dd66667777777766667777dd6666666666667766
+6666dddd66665555dddd66777766776666666666660000550000667777777766555555550000550000dd667755555555555555dd6666dddd6666666677667766
+6666dddd66665555dddd66777766776666666666660000550000667777777766555555550000550000dd667755555555555555dd6666dddd6666666677667766
+66dd77dd7777dddddd666677776666666666777766dd000000dddd77777777665555555555000000dddd777755555555555555555555555555555555dddddd66
+66dd77dd7777dddddd666677776666666666777766dd000000dddd77777777665555555555000000dddd777755555555555555555555555555555555dddddd66
+66dd7766667766dd55dd77776666666666666666dd55555555555577777777775555dd5555555555556677665555555555555555555555555555555555dd5555
+66dd7766667766dd55dd77776666666666666666dd55555555555577777777775555dd5555555555556677665555555555555555555555555555555555dd5555
+66dd7766666666665555dd7755667777776666665555555555555577777777775555555555555555557777665555555555555555555555dddddddddd55dd6655
+66dd7766666666665555dd7755667777776666665555555555555577777777788888888888888888888888888888888888888888888888888888dddd55dd6655
+66dd6666dd6666dd555555dddd66777777777766555555555555557777776678aaa8aaa8aaa88aa8aaa88aa8aa88aaa88888aaa88888a8a88a88dddddd6666dd
+66dd6666dd6666dd555555dddd66777777777766555555555555557777776678a8a8a8a8a888a8888a88a8a8a8a8a8a8888888a88a88a8a88a88dddddd6666dd
+dd556666dd6666dd555555dd66dd7777777777dd555555555555dd7777776678aaa8aa88aa88aaa88a88a8a8a8a8aaa888888a88aaa88a888a88dd6666dd6655
+dd556666dd6666dd555555dd66dd7777777777dd555555555555dd7777776678a888a8a8a88888a88a88a8a8a8a8a8a88888a8888a88a8a88888dd6666dd6655
+55556666dd6666dd5555dddddd6666777777776666666666dddddd6677776678a888a8a8aaa8aa88aaa8aa88a8a8a8a88888aaa88888a8a88a88666666dd6655
+55556666dd6666dd5555dddddd6666777777776666666666dddddd66777766788888888888888888888888888888888888888888888888888888666666dd6655
+55556666dd6666dd55dddddddd55dd6677777766666666666655556677dddd7755555555dd555555dd7777665555555555555555555555dddd66dddd55dd66dd
+55556666dd6666dd55dddddddd55dd6677777766666666666655556677dddd7755555555dd555555dd7777665555555555555555555555dddd66dddd55dd66dd
+55556666dd6666dd55dd55dddd6666dd666677666666667766dd556677dddd7755dddd5566dd555555777766dd55555555555555555555dddd55dddd55dd66dd
+55556666dd6666dd55dd55dddd6666dd666677666666667766dd556677dddd7755dddd5566dd555555777766dd55555555555555555555dddd55dddd55dd66dd
+55556666dd6666dd555555dddd777777dddd6677777777776655557777dd6677dddd66dddd555555dd777766dddd555555555555555555dd55dddd66dd6666dd
+55556666dd6666dd555555dddd777777dddd6677777777776655557777dd6677dddd66dddd555555dd777766dddd555555555555555555dd55dddd66dd6666dd
+dd55dd66dddddddd55dddddddddd667777dd55dddddd66666666dd7777dddd77dd6666dd665555dd66777777dddddddd5555555555dd66dd66dddddddddd66dd
+dd55dd66dddddddd55dddddddddd688888888888888888888888888888888888888888888888888888888888888888888855555555dd66dd66dddddddddd66dd
+dd777777dddddddd55dd55ddddddd877787878888887787878777877787778777887788778777877787778787877787778dd5555554444ddeeddeedd666666dd
+dd777777dddddddd55dd55ddddddd878787878888878887878787878887878787878787888878887888788787878887878dd5555554444ddeeddeedd666666dd
+556677666666dddd55dd55ddddddd877887778888877787878777877887788777878787778878887888788787877887778dd4444444444eeee44ffff77666666
+556677666666dddd55dd55ddddddd878788878888888787878788878887878788878788878878887888788777878887888dd4444444444eeee44ffff77666666
+555555dddddddddddddddd555555d877787778888877888778788877787878788877887788777887887778878877787888444444444444eeee7766dddd667777
+555555dddddddddddddddd555555d888888888888888888888888888888888888888888888888888888888888888888888444444444444eeee7766dddd667777
+dd555555555555dddddddddd5555dddddd667766dd5555dddddd667766dddd6666ddddddddff7777777766eeeeff66ee444444444444ee6677dddd667777ff77
+dd555555555555dddddddddd5555dddddd667766dd5555dddddd667766dddd6666ddddddddff7777777766eeeeff66ee444444444444ee6677dddd667777ff77
+dd555555555555555555dddd555555dd55dd55dd555555555555dddddddd6666ee44667777667777ff4444eeffdd55dd4444444444ff7766dd667777ff777766
+dd55555555555555588888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888866dd667777ff777766
+777777776666dd555887787778777887787778778877787888888877787878888877788778777888887778777877887778777877788778dd6677ffff77666666
+777777776666dd555878787878878878888788787878787888888878787878888887887878777888887778787878787888878878787878dd6677ffff77666666
+77667766666666777878787788878878888788787877787888888877887778888887887878787888887878777878787788878877887878777777777766777777
+77667766666666777878787878878878788788787878787888888878788878888887887878787888887878787878787888878878787878777777777766777777
+7766dd666666ddddd877887878777877787778787878787778888877787778888887887788787888887878787878787778777878787788ffff7766dd667777ee
+7766dd666666ddddd888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888ffff7766dd667777ee
+776666eeeeff666666dddd6666777777777777777777777766777777777777777766eeeeffffffff7777ee44dddddd555566dd667777ffff66dddd7777ff4444
+776666eeeeff666666dddd6666777777777777777777777766777777777777777766eeeeffffffff7777ee44dddddd555566dd667777ffff66dddd7777ff4444
+667777ffff444444ee6666666666666666777777777777777777777777ff7777777777ff6666eeeeee4444446677dd5555ff777777ff7766dd6677ffdd444444
+66777888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888444444
+ffff6877787778877888888888777877787778877887787778877878888778888877787778777877787788777887788778888877887778777877787788444444
+ffff6878788788788887888888777878787878788878787878787878887878888878787878787878787878878878887878888887887878787878787878444444
+44eee877788788788888888888787877787788788878787778787878887878888877787778778877787878878877787878888887887778787878787878444444
+44eee878888788788887888888787878787878788878787888787878887878888878887878787878787878878888787878888887887878787878787878444444
+77777878887778877888888888787878787878877877887888778877787788888878887878787878787778777877887788888877787778777877787778555555
+77777888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888555555
+444444eeeeeeeeff6666ff777777777777777777777777777777777744444444eeffff6666444444444444776666dd555544ffffee5555555555555555555555
+444444eeeeeeeeff6666ff777777777777777777777777777777777744444444eeffff6666444444444444776666dd555544ffffee5555555555555555555555
+4444ee44444444444444444444ffff44444444444444444444444444ee444444eeeeee4444444444444444666666665555555555555555555555555555555555
+4444ee44444444444444444888888888888888888888888888888888888888888888888888888888888888888888888888888888555555555555555555555555
+44444444888844444444eef8aaa8aaa8aa88aaa88888aaa8aa888888aaa8aaa8aa88aa888aa8a8a8a888a8a8aaa8aa88aaa8aaa855555555555555555555dddd
+44444444888844444444eef8aaa8a8a8a8a8a88888888a88a8a88888a8a8a888a8a8a8a8a888a8a8a888a8a8a8a8a8a88a88a8a855555555555555555555dddd
+554444444444444444444448a8a8aaa8a8a8aa8888888a88a8a88888aaa8aa88a8a8a8a8aaa8aaa8a888a8a8aaa8a8a88a88aaa8555555555555dddd66666666
+554444444444444444444448a8a8a8a8a8a8a88888888a88a8a88888a888a888a8a8a8a888a888a8a888aaa8a8a8a8a88a88a8a8555555555555dddd66666666
+555555555555555555444448a8a8a8a8aaa8aaa88888aaa8a8a88888a888aaa8a8a8a8a8aa88aaa8aaa88a88a8a8a8a8aaa8a8a85555dddddddd666666666666
+555555555555555555444448888888888888888888888888888888888888888888888888888888888888888888888888888888885555dddddddd666666666666
+5555555555555555555555dd55dd5555dd555555555555555555554444445555555555555555555555555555555555555555dddddd6666666666666666666666
+5555555555555555555555dd55dd5555dd555555555555555555554444445555555555555555555555555555555555555555dddddd6666666666666666666666
+55dddddd55dd55dddddddddddd55555555555555555555555555555555555555555555555555555555555555555555dddddd6666666666666666666666666666
+55dddddd55dd55dddddddddddd55555555555555555555555555555555555555555555555555555555555555555555dddddd6666666666666666666666666666
+dddddddddddddddddddd5555555555555555555555555555555555555555555555555555555555555555dddddddddd66666666666666666666666666dd6666dd
+dddddddddddddddddddd5555555555555555555555555555555555555555555555555555555555555555dddddddddd66666666666666666666666666dd6666dd
+
+__map__
+0000000000000000000000000000000020212223606162632021222360616263000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000004050607080030313233707172733031323370717273000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000014151617000040414243202122234041424320212223000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000050515253303132335051525330313233000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000020212223606162632021222360616263000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000030313233707172733031323370717273000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000040414243202122234041424320212223000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000050515253303132335051525330313233000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000020212223606162632021222360616263000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000030313233707172733031323370717273000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000040414243202122234041424320212223000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000050515253303132335051525330313233000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000020212223606162632021222360616263000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000030313233707172733031323370717273000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0202020202020202020202020202020240414243202122234041424320212223000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0303030303030303030303030303030350515253303132335051525330313233000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+__sfx__
+011000000943600500005000050000502005020050200502005020050200502005020050200502005020050200502005020050200502005020050200502005020050200502005020050200502005020050200502
+011001012553000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+011001013d33000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0114000038300383003830038326383003830038300383000e0030e00000300003000030000300003000030000300003000030000300003000030000300003000030000300003000030000300003000030000300
+01180000003100131002310033100431005310063100731008310093100a3100b3100c3100d3100e3100f310103101131012310133101431015310163101731018310193101a3101b3101c3101d3101e3101f310
+01180000203102131022310233102431025310263102731028310293102a3102b3102c3102d3102e3102f310303103131032310333103431035310363103731038310393103a3103b3103c3103d3103e3103f310
+011000010941700500005000050000502005020050200502005020050200502005020050200502005020050200502005020050200502005020050200502005020050200502005020050200000000000000000000
+010c01012553000000255300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+010c01013d330000003d3300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+011001010c05100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+011000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+011000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+__music__
+01 41420300
+02 41420300
+01 41424300
+02 41424300
+01 41424306
+02 41424306
+04 01024344
+04 07084344
+
